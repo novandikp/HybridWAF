@@ -9,12 +9,7 @@ def evaluation(y_true, y_pred):
     tpr = __calculate_TruePositiveRate(new_cf)
     fpr = __calculate_FalsePositiveRate(new_cf)
     fdr = __calculate_FalseDiscoveryRate(new_cf)
-    return {
-        "accuracy": accuracy,
-        "tpr": tpr,
-        "fpr": fpr,
-        "fdr": fdr
-    }
+    return (accuracy, tpr, fpr, fdr)
 
 
 def classification_report(y_true, y_pred):
@@ -37,6 +32,8 @@ def classification_report(y_true, y_pred):
 
 def send_classification_report(config, y_true, y_pred):
     accuracy, tpr, fpr, fdr = evaluation(y_true, y_pred)
+
+
     send_notification(config.NOTIFICATION, "Accuracy: " + str(accuracy))
     send_notification(config.NOTIFICATION, "True Positive Rate: " + str(tpr))
     send_notification(config.NOTIFICATION, "False Positive Rate: " + str(fpr))

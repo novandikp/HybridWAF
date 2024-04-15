@@ -22,7 +22,6 @@ def train(test_size=0.25, dataset_type="ecml", algorithm="psosvm", config=None):
     else:
         dataset = datasets.getFormattedDatasets()
 
-    # dataset = dataset.groupby("type").head(1000)
 
     send_notification(config.NOTIFICATION, "Extracting features...")
     X = fe.transform_data(dataset)
@@ -56,7 +55,7 @@ def train(test_size=0.25, dataset_type="ecml", algorithm="psosvm", config=None):
         psosvm.setData(X_train, y_train, val_size=0.2, random_state=1)
         psosvm.train()
         y_pred = psosvm.predict(X_test)
-        send_classification_report(y_test, y_pred)
+        send_classification_report(config, y_test, y_pred)
 
         send_notification(config.NOTIFICATION, "Saving model...")
         filename_model_variants = f"model_{algorithm}_{dataset_type}_{test_size}.pkl"
