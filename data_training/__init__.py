@@ -23,7 +23,7 @@ def train(test_size: float = 0.25, dataset_type: str = "ecml", algorithm: str = 
     else:
         dataset = datasets.getFormattedDatasets()
 
-    dataset = dataset.groupby("type").head(1000)
+    # dataset = dataset.groupby("type").head(1000)
     send_notification(config.NOTIFICATION, "Extracting features...")
     X = fe.transform_data(dataset)
 

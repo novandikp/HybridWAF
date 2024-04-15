@@ -34,7 +34,7 @@ class PSOSVM:
             c = 0.0001
 
         # svc = SVC(kernel="rbf", gamma=gamma, C=c)
-        svc = SVM(self.x_train, self.y_train, gamma=gamma, c=c, kernel="rbf", iter=20)
+        svc = SVM(self.x_train, self.y_train, gamma=gamma, c=c, kernel="rbf", iter=5)
         svc.fit()
         y_train_pred = svc.predict(self.x_train)
         y_test_pred = svc.predict(self.x_test)
