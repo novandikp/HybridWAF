@@ -4,7 +4,7 @@ import os
 import re
 
 
-def method_Key(method):
+def method_Key(method: str) -> int:
     method = method.lower()
     if method == 'get':
         return 0
@@ -22,7 +22,7 @@ def method_Key(method):
         return 6
 
 
-def countSpecialCharacter(text):
+def countSpecialCharacter(text: str) -> int:
     pattern = r'[!@#$%^&*()_+{}\[\]:;<>,.?\/\\\-]'
     special_characters = re.findall(pattern, text)
     return len(special_characters)
@@ -55,7 +55,7 @@ class RequestStandarization:
         self.method = request.get('method', 'GET')
         self.__getKeywordMalicious()
 
-    def __countMaliciousKeywords(self, text):
+    def __countMaliciousKeywords(self, text: str) -> int:
         length = 0
         for word in self.malicious_keywords:
             # add escape character to special characters
@@ -69,130 +69,130 @@ class RequestStandarization:
         with open(file_path, 'r', encoding='utf-8') as file:
             self.malicious_keywords = file.read().splitlines()
 
-    def __countRequestLength(self):
+    def __countRequestLength(self) -> int:
         return len(str(self.request))
 
-    def __countQueryParams(self):
+    def __countQueryParams(self) -> int:
         length = 0
         for key, value in self.query.items():
             length += len(value)
         return length
 
-    def __countAcceptEncoding(self):
+    def __countAcceptEncoding(self) -> int:
         return len(self.headers.get('‘Accept-Encoding', ''))
 
-    def __countAcceptLanguage(self):
+    def __countAcceptLanguage(self) -> int:
         return len(self.headers.get('Accept-Language', ''))
 
-    def __contentLength(self):
+    def __contentLength(self) -> int:
         return int(self.headers.get('Content-Length', '0'))
 
-    def __countHost(self):
+    def __countHost(self) -> int:
         return len(self.headers.get('Host', ''))
 
-    def __countUserAgent(self):
+    def __countUserAgent(self) -> int:
         return len(self.headers.get('User-Agent', ''))
 
-    def __countNumberOfQueryParams(self):
+    def __countNumberOfQueryParams(self) -> int:
         length = 0
         for _ in self.query.items():
             length += 1
         return length
 
-    def __countDigitOfQueryParams(self):
+    def __countDigitOfQueryParams(self) -> int:
         length = 0
         for key, value in self.query.items():
             length += sum(c.isdigit() for c in value)
         return length
 
-    def __countSpecialCharsOfQueryParams(self):
+    def __countSpecialCharsOfQueryParams(self) -> int:
         length = 0
         for key, value in self.query.items():
             length += countSpecialCharacter(value)
         return length
 
-    def __countLettersOfQueryParams(self):
+    def __countLettersOfQueryParams(self) -> int:
         length = 0
         for key, value in self.query.items():
             length += sum(c.isalpha() for c in value)
         return length
 
-    def __countNumberOfBodyParams(self):
+    def __countNumberOfBodyParams(self) -> int:
         length = 0
         for _ in self.body.items():
             length += 1
         return length
 
-    def __countDigitOfBodyParams(self):
+    def __countDigitOfBodyParams(self) -> int:
         length = 0
         for key, value in self.body.items():
             length += sum(c.isdigit() for c in value)
         return length
 
-    def __countSpecialCharsOfBodyParams(self):
+    def __countSpecialCharsOfBodyParams(self) -> int:
         length = 0
         for key, value in self.body.items():
             length += countSpecialCharacter(value)
         return length
 
-    def __countLettersOfBodyParams(self):
+    def __countLettersOfBodyParams(self) -> int:
         length = 0
         for key, value in self.body.items():
             length += sum(c.isalpha() for c in value)
         return length
 
-    def __countPathLength(self):
+    def __countPathLength(self) -> int:
         return len(self.path)
 
-    def __countSpecialCharsOfPath(self):
+    def __countSpecialCharsOfPath(self) -> int:
         return countSpecialCharacter(self.path)
 
-    def __countDigitsOfPath(self):
+    def __countDigitsOfPath(self) -> int:
         return sum(c.isdigit() for c in self.path)
 
-    def __countLettersOfPath(self):
+    def __countLettersOfPath(self) -> int:
         return sum(c.isalpha() for c in self.path)
 
-    def __methodIdentifier(self):
+    def __methodIdentifier(self) -> int:
         return method_Key(self.method)
 
-    def __countKeywordinPath(self):
+    def __countKeywordinPath(self) -> int:
         return self.__countMaliciousKeywords(self.path)
 
-    def __countKeywordinQuery(self):
+    def __countKeywordinQuery(self) -> int:
         length = 0
         for key, value in self.query.items():
             length += self.__countMaliciousKeywords(value)
         return length
 
-    def __countKeywordinBody(self):
+    def __countKeywordinBody(self) -> int:
         length = 0
         for key, value in self.body.items():
             length += self.__countMaliciousKeywords(value)
         return length
 
-    def __countLengthofCookie(self):
+    def __countLengthofCookie(self) -> int:
         return len(self.headers.get('Cookie', ''))
 
-    def __countAccept(self):
+    def __countAccept(self) -> int:
         return len(self.headers.get('Accept', ''))
 
-    def __countAcceptCharset(self):
+    def __countAcceptCharset(self) -> int:
         return len(self.headers.get('Accept-Charset', ''))
 
-    def __countContentType(self):
+    def __countContentType(self) -> int:
         return len(self.headers.get('Content-Type', ''))
 
-    def __countReferer(self):
+    def __countReferer(self) -> int:
         return len(self.headers.get('Referer', ''))
 
-    def __entropyRequest(self):
+    def __entropyRequest(self) -> float:
         v = str(self.request)
         return (-1) * sum(
             i / len(v) * math.log2(i / len(v))
             for i in collections.Counter(v).values())
 
-    def getFeatures(self):
+    def getFeatures(self) -> list:
         return [
             self.__countRequestLength(),
             self.__countQueryParams(),

@@ -1,8 +1,9 @@
 import os
 import sqlite3
 
+
 class SignatureDatabase:
-    def __init__(self, filename):
+    def __init__(self, filename: str):
         if not os.path.exists(filename):
             open(filename, "w+").close()
         self.conn = sqlite3.connect(filename)
@@ -12,7 +13,7 @@ class SignatureDatabase:
         )
         self.conn.commit()
 
-    def add_signature(self, signature, malicious=False):
+    def add_signature(self, signature, malicious: bool = False):
         hash_signature = hash(tuple(signature))
         self.c.execute(
             "INSERT INTO signatures (signature, malicious) VALUES (?, ?)",

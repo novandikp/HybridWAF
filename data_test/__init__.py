@@ -42,7 +42,7 @@ def test(test_size=0.25):
             resultSignature = detect_signature(x)
             real_condition.append(y)
             if resultSignature is None:
-                result = model.predict([x])
+                result = model.train([x])
                 add_signature(x, bool(result[0]))
                 end_time = time.time()
                 classification_time = end_time - start_time

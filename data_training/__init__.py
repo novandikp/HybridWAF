@@ -9,9 +9,10 @@ from data_evaluation import send_classification_report
 from util.LabelEncoder import LabelEncoder
 from cloudpickle import dump
 import os
+import json
 
 
-def train(test_size=0.25, dataset_type="ecml", algorithm="psosvm", config=None):
+def train(test_size: float = 0.25, dataset_type: str = "ecml", algorithm: str = "psosvm", config=None):
     send_notification(config.NOTIFICATION,
                       f"Training with test size: {test_size}, dataset: {dataset_type}, algorithm: {algorithm}")
     send_notification(config.NOTIFICATION, "Loading dataset...")
@@ -22,8 +23,7 @@ def train(test_size=0.25, dataset_type="ecml", algorithm="psosvm", config=None):
     else:
         dataset = datasets.getFormattedDatasets()
 
-    # dataset = dataset.groupby("type").apply(lambda x: x.sample(n=1000)).reset_index(drop=True)
-
+    dataset = dataset.groupby("type").head(1000)
     send_notification(config.NOTIFICATION, "Extracting features...")
     X = fe.transform_data(dataset)
 
@@ -42,15 +42,15 @@ def train(test_size=0.25, dataset_type="ecml", algorithm="psosvm", config=None):
 
     send_notification(config.NOTIFICATION, "Training model...")
     if algorithm == "svm":
-        svm = SVM(config)
-        # svm.fit(X_train, y_train)
-        # y_pred = svm.predict(X_test)
-        # send_classification_report(y_test, y_pred)
-        #
-        # send_notification(config.NOTIFICATION, "Saving model...")
-        # filename_model_variants = f"model_{algorithm}_{dataset_type}_{test_size}.pkl"
-        # path_model = os.path.join(os.getcwd(), "model", filename_model_variants)
-        # svm.save_model(path_model)
+        svm = SVM(X_train, y_train, kernel="rbf")
+        svm.fit()
+        y_pred = svm.predict(X_test)
+        send_classification_report(config, y_test, y_pred)
+
+        send_notification(config.NOTIFICATION, "Saving model...")
+        filename_model_variants = f"model_{algorithm}_{dataset_type}_{test_size}.pkl"
+        path_model = os.path.join(os.getcwd(), "model", filename_model_variants)
+        svm.save_model(path_model)
     else:
         psosvm = PSOSVM(config)
         psosvm.setData(X_train, y_train, val_size=0.2, random_state=1)
@@ -74,3 +74,23 @@ def training_model(args):
         algorithm=args.alg,
         config=args.config
     )
+
+
+def training_all_scenario(args):
+    scenario_folder = os.path.join(os.getcwd(), "train_scenario")
+    # get all scenario in folder *.json
+    scenarios = [f for f in os.listdir(scenario_folder) if f.endswith(".json")]
+    for fileName in scenarios:
+        with open(os.path.join(scenario_folder, fileName)) as f:
+            scenarioType = json.load(f)
+            for scenario in scenarioType:
+                send_notification(args.config.NOTIFICATION,
+                                  f"Training scenario {scenario['name']}")
+                train(
+                    test_size=scenario["test_size"],
+                    dataset_type=scenario["dataset_type"],
+                    algorithm=scenario["algorithm"],
+                    config=args.config
+                )
+
+    send_notification(args.config.NOTIFICATION, "Training all scenario is done")

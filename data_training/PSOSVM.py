@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import ndarray
 import random
 from util.Notification import send_notification
 from data_training.SVM import SVM
@@ -19,12 +20,12 @@ class PSOSVM:
         self.history = []
         self.config = config
 
-    def setData(self, x, y, val_size=0.2, random_state=42):
+    def setData(self, x: ndarray, y: ndarray, val_size: float = 0.2, random_state: int = 42):
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
             x, y, test_size=val_size, random_state=random_state
         )
 
-    def fitness_function(self, position):
+    def fitness_function(self, position: tuple) -> tuple:
         (gamma, c) = position
         # Check if gamma and c is not negative or zero
         if gamma <= 0:
@@ -33,7 +34,7 @@ class PSOSVM:
             c = 0.0001
 
         # svc = SVC(kernel="rbf", gamma=gamma, C=c)
-        svc = SVM(self.x_train,self.y_train,gamma=gamma, c=c,kernel="rbf", iter=20)
+        svc = SVM(self.x_train, self.y_train, gamma=gamma, c=c, kernel="rbf", iter=20)
         svc.fit()
         y_train_pred = svc.predict(self.x_train)
         y_test_pred = svc.predict(self.x_test)
@@ -43,7 +44,7 @@ class PSOSVM:
             svc,
         )
 
-    def train(self, save_best=True):
+    def train(self, save_best: bool = True):
         start = time.time()
         particle_position_vector = np.array(
             [
@@ -60,7 +61,7 @@ class PSOSVM:
 
         while iteration < self.config.PSO.n_iterations:
             for i in range(self.config.PSO.n_particles):
-                send_notification(self.config.NOTIFICATION,f"particle- {i} iteration: {iteration}")
+                send_notification(self.config.NOTIFICATION, f"particle- {i} iteration: {iteration}")
                 train_res, test_res, model = self.fitness_function(
                     particle_position_vector[i]
                 )
@@ -104,20 +105,20 @@ class PSOSVM:
                 particle_position_vector[i] = new_position
             iteration = iteration + 1
 
-    def predict(self, x):
+    def predict(self, x: ndarray):
         return self.best_model.predict(x)
 
     def get_history(self):
         return self.history
 
-    def save_history(self, filename):
+    def save_history(self, filename: str):
         df = pd.DataFrame(self.history)
         df.to_csv(filename, index=False)
 
-    def save_best(self, filename):
+    def save_best(self, filename: str):
         self.best_model.save_model(filename)
 
-    def __save_model(self, fitness_candicate, model, saved):
+    def __save_model(self, fitness_candicate: tuple, model: SVM, saved: bool):
         self.best_model = model
         if saved:
             # make directory if not exist
@@ -125,5 +126,3 @@ class PSOSVM:
                 os.makedirs("saved_model")
             filename = f"saved_model/{fitness_candicate[1]}_{fitness_candicate[0]}.pkl"
             self.best_model.save_model(filename)
-
-

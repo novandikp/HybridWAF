@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Skenario SVM",
+    "test_size": 0.25,
+    "dataset_type": "all",
+    "algorithm": "svm"
+  },
+  {
+    "name": "Skenario PSO-SVM",
+    "test_size": 0.25,
+    "dataset_type": "all",
+    "algorithm": "psosvm"
+  }
+]

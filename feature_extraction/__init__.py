@@ -3,7 +3,7 @@ import time
 from feature_extraction.request_standarization import RequestStandarization
 
 
-def transform_data(data):
+def transform_data(data) -> pd.DataFrame:
     request_standarization_list = []
     time_need = []
     if isinstance(data, pd.DataFrame):
@@ -30,7 +30,7 @@ def transform_data(data):
     return pd.DataFrame(request_standarization_list)
 
 
-def transform_data_with_time(data):
+def transform_data_with_time(data) -> pd.DataFrame:
     request_standarization_list = []
     time_need = []
     if isinstance(data, pd.DataFrame):

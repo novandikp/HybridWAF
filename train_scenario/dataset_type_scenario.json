@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Skenario CSIC 2010",
+    "test_size": 0.25,
+    "dataset_type": "csic",
+    "algorithm": "psosvm"
+  },
+  {
+    "name": "Skenario ECML PKDD 2007",
+    "test_size": 0.25,
+    "dataset_type": "ecml",
+    "algorithm": "psosvm"
+  },
+  {
+    "name": "Skenario All",
+    "test_size": 0.25,
+    "dataset_type": "all",
+    "algorithm": "psosvm"
+  }
+]

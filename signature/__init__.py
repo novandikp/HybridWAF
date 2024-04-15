@@ -9,7 +9,7 @@ def detect_signature(signature):
     return signature_database.detect(signature)
 
 
-def add_signature(signature, malicious=False):
+def add_signature(signature, malicious: bool = False):
     signature_database.add_signature(signature, malicious)
 
 
