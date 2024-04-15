@@ -3,7 +3,7 @@ import numpy as np
 
 class LabelEncoder:
     def __init__(self):
-        self.neg = 0
+        self.neg = -1
         pass
 
     def transform(self, data):

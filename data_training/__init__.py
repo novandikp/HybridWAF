@@ -22,6 +22,7 @@ def train(test_size=0.25, dataset_type="ecml", algorithm="psosvm", config=None):
     else:
         dataset = datasets.getFormattedDatasets()
 
+    # dataset = dataset.groupby("type").apply(lambda x: x.sample(n=1000)).reset_index(drop=True)
 
     send_notification(config.NOTIFICATION, "Extracting features...")
     X = fe.transform_data(dataset)
@@ -42,14 +43,14 @@ def train(test_size=0.25, dataset_type="ecml", algorithm="psosvm", config=None):
     send_notification(config.NOTIFICATION, "Training model...")
     if algorithm == "svm":
         svm = SVM(config)
-        svm.fit(X_train, y_train)
-        y_pred = svm.predict(X_test)
-        send_classification_report(y_test, y_pred)
-
-        send_notification(config.NOTIFICATION, "Saving model...")
-        filename_model_variants = f"model_{algorithm}_{dataset_type}_{test_size}.pkl"
-        path_model = os.path.join(os.getcwd(), "model", filename_model_variants)
-        svm.save_model(path_model)
+        # svm.fit(X_train, y_train)
+        # y_pred = svm.predict(X_test)
+        # send_classification_report(y_test, y_pred)
+        #
+        # send_notification(config.NOTIFICATION, "Saving model...")
+        # filename_model_variants = f"model_{algorithm}_{dataset_type}_{test_size}.pkl"
+        # path_model = os.path.join(os.getcwd(), "model", filename_model_variants)
+        # svm.save_model(path_model)
     else:
         psosvm = PSOSVM(config)
         psosvm.setData(X_train, y_train, val_size=0.2, random_state=1)

@@ -1,134 +1,129 @@
 import numpy as np
-from pickle import dump
-# from util.Notification import send_notification
-from datetime import datetime
+from numpy import ndarray
+from random import choice
+from cloudpickle import dump
 
 
 class SVM:
-    def __init__(self, config, gamma=1, C=1, tol=1e-3, max_passes=50):
-        self.C = float(C)
-        self.gamma = float(gamma)
-        self.kernel = self.rbf
-        self.tol = tol
-        # self.config = config
-        self.max_passes = max_passes
-        self.epsilon = 1e-5
+    def __init__(self, X: ndarray, y: ndarray, kernel: str, c: float = 1, tol: float = 10e-8, gamma: float = 0.1, iter=10):
+        self._X = X
+        self._y = y
+        self._C = c
+        self._tol = tol
+        self._set_kernel_type(kernel, gamma)
+        self.iter = iter
+        np.random.seed(42)
+        self._alphas = np.random.uniform(0, c, size=len(y))
+        self._b = 0
 
-    def rbf(self, Xi, Xj):
-        return np.exp(-self.gamma * np.linalg.norm(Xi - Xj) ** 2)
-
-    def fit(self, X, y):
-        self.m_samples, self.n_features = X.shape
-        self.X = X
-        self.y = y.astype(np.float64)
-        # assert self.X.shape[0] == self.y.shape[0]
-        #
-        # for i in range(self.m_samples):
-        #     assert self.y[i] == 0 or self.y[i] == 1
-        # changes classes to -1 and 1
-        self.y = 2 * self.y - 1
-
-        self.K = np.zeros((self.m_samples, self.m_samples))
-
-        start_time = datetime.now()
-        for i in range(self.m_samples):
-            for j in range(self.m_samples):
-                self.K[i, j] = self.kernel(self.X[i], self.X[j])
-        print(f"Kernel matrix has been calculated in {datetime.now() - start_time}")
-        # send_notification(self.config.NOTIFICATION,
-        #                   f"Kernel matrix has been calculated in {datetime.now() - start_time}")
-
-        def f(index):  # f(x) = w^T * x + b
-            return np.sum(self.alphas * self.y * self.K[index, :]) + self.b
-
-        self.alphas = np.zeros(shape=self.m_samples)
-        self.b = 0
-        passes = 0
-        while (passes < self.max_passes):
-            num_changed_alphas = 0
-            half = int(self.m_samples / 2)
-            for i in range(self.m_samples):
-                E_i = f(i) - self.y[i]
-                if (self.y[i] * E_i < -self.tol and self.alphas[i] < self.C) or (
-                        self.y[i] * E_i > self.tol and self.alphas[i] > 0):
-                    j = np.random.choice(list(range(0, i)) + list(range(i + 1, self.m_samples)))
-                    assert i != j
-                    E_j = f(j) - self.y[j]
-                    old_alpha_i, old_alpha_j = self.alphas[i], self.alphas[j]
-                    L = max(0, self.alphas[j] - self.alphas[i]) if self.y[i] != self.y[j] else max(0, self.alphas[i] +
-                                                                                                   self.alphas[
-                                                                                                       j] - self.C)
-                    H = min(self.C, self.C + self.alphas[j] - self.alphas[i]) if self.y[i] != self.y[j] else min(self.C,
-                                                                                                                 self.alphas[
-                                                                                                                     i] +
-                                                                                                                 self.alphas[
-                                                                                                                     j])
-                    if L == H:
-                        continue
-                    ni = 2 * self.K[i, j] - self.K[i, i] - self.K[j, j]
-                    if ni >= 0:
-                        continue
-
-                    alpha_j = self.alphas[j] - self.y[j] * (E_i - E_j) / ni
-                    if alpha_j > H:
-                        alpha_j = H
-                    elif alpha_j < L:
-                        alpha_j = L
-
-                    if abs(old_alpha_j - alpha_j) < self.tol:
-                        continue
-
-                    alpha_i = self.alphas[i] + self.y[i] * self.y[j] * (old_alpha_j - alpha_j)
-
-                    b_1 = self.b - E_i - self.y[i] * (alpha_i - old_alpha_i) * self.K[i, i] - self.y[j] * (
-                            alpha_j - old_alpha_j) * self.K[i, j]
-                    b_2 = self.b - E_j - self.y[i] * (alpha_i - old_alpha_i) * self.K[i, j] - self.y[j] * (
-                            alpha_j - old_alpha_j) * self.K[j, j]
-
-                    if 0 < alpha_i < self.C:
-                        b = b_1
-                    elif 0 < alpha_j < self.C:
-                        b = b_2
-                    else:
-                        b = (b_1 + b_2) / 2
-
-                    num_changed_alphas += 1
-
-                    self.alphas[i] = alpha_i
-                    self.alphas[j] = alpha_j
-                    self.b = b
-
-            if num_changed_alphas == 0:
-                passes += 1
-            else:
-                passes = 0
-
-        self.support_ = np.arange(self.m_samples)[self.alphas > self.epsilon]
-        self.support_vectors_ = self.X[self.support_]
-        self.dual_coef_ = [self.alphas[self.support_]]
-
-        b = sum(self.y[i] - sum(self.alphas[j] * self.y[j] * self.K[i, j]
-                                for j in self.support_)
-                for i in self.support_)
-        if len(self.support_) > 0:
-            b /= len(self.support_)
+    # for a more organised initialization
+    def _set_kernel_type(self, kernel: str, gamma: float):
+        if kernel.lower() == 'linear':
+            self._kernel = self._linear_kernel
+        elif kernel.lower() == 'rbf':
+            self._kernel = self._rbf_kernel
+            self._gamma = gamma
         else:
-            b = 0
+            raise AttributeError(f'A kernel type "{kernel}" does not exist!')
 
-        self.b = b
-        self.intercept_ = b
+    # a linear kernel function
+    def _linear_kernel(self, x1: ndarray, x2: ndarray) -> float:
+        return np.inner(x1, x2)
 
-    def predict_one(self, x):
-        w_phi_x = sum(self.alphas[i] * self.y[i] * self.kernel(self.X[i], x)
-                      for i in self.support_)
-        return w_phi_x + self.b
+    # a radial basis kernel function
+    def _rbf_kernel(self, x1: ndarray, x2: ndarray) -> float:
+        x1 = x1[np.newaxis, :] if np.ndim(x1) == 1 else x1
+        x2 = x2[np.newaxis, :] if np.ndim(x2) == 1 else x2
+        euclidean_dist = np.linalg.norm(x1[:, :, np.newaxis] - x2.T[np.newaxis, :, :], axis=1) ** 2
 
-    def predictor(self, x):
-        xs = [x] if len(x.shape) == 1 else x
-        return np.array([self.predict_one(x) for x in xs])
+        return np.exp(-self._gamma * np.squeeze(euclidean_dist))
 
-    def predict(self, X):
-        return (self.predictor(X) > 0).astype(np.float64)
+    # getting one prediction
+    def _get_prediction(self, x: ndarray) -> float:
+        return np.sum(self._alphas * self._y * self._kernel(self._X, x)) + self._b
 
-    def save_model(self, path):
+    # getting the bounds (considering our constraints)
+    def _get_bounds(self, i: int, j: int) -> tuple:
+        if self._y[i] != self._y[j]:
+            L = max(0, self._alphas[j] - self._alphas[i])
+            H = min(self._C, self._C + self._alphas[j] - self._alphas[i])
+        else:
+            L = max(0, self._alphas[i] + self._alphas[j] - self._C)
+            H = min(self._C, self._alphas[i] + self._alphas[j])
+        return L, H
+
+    # calculating an error
+    def _get_error(self, i: int) -> float:
+        return self._get_prediction(self._X[i]) - self._y[i]
+
+    # calculating eta
+    def _get_eta(self, x1: ndarray, x2: ndarray) -> float:
+        return 2 * self._kernel(x1, x2) - self._kernel(x1, x1) - self._kernel(x2, x2)
+
+    # clipping a new alpha wrt the bounds
+    def _clip_alpha(self, L: float, H: float, alpha: float) -> float:
+        if alpha >= H:
+            return H
+        elif alpha <= L:
+            return L
+        return alpha
+
+    # calculating a threshold
+    def _get_threshold(self, i: int, j: int, new_a1: float, new_a2: float, e1: float, e2: float) -> float:
+        k_ii = self._kernel(self._X[i], self._X[i])
+        k_jj = self._kernel(self._X[j], self._X[j])
+        k_ij = self._kernel(self._X[i], self._X[j])
+
+        b1 = self._b - e1 - self._y[i] * (new_a1 - self._alphas[i]) * k_ii - self._y[j] * (
+                new_a2 - self._alphas[j]) * k_ij
+        b2 = self._b - e2 - self._y[i] * (new_a1 - self._alphas[i]) * k_ij - self._y[j] * (
+                new_a2 - self._alphas[j]) * k_jj
+
+        if 0 < self._alphas[i] < self._C:
+            return b1
+        elif 0 < self._alphas[j] < self._C:
+            return b2
+        return (b1 + b2) / 2
+
+    # one step of SMO
+    def _step(self, i: int, j: int, e1: float) -> bool:
+        L, H = self._get_bounds(i, j)
+        e2 = self._get_error(j)
+        eta = self._get_eta(self._X[i], self._X[j])
+
+        if eta >= 0 or L >= H:
+            return False
+
+        new_a2 = self._clip_alpha(L, H, self._alphas[j] - (self._y[j] * (e1 - e2)) / eta)
+        new_a1 = self._alphas[i] + self._y[i] * self._y[j] * (self._alphas[j] - new_a2)
+
+        self._b = self._get_threshold(i, j, new_a1, new_a2, e1, e2)
+        self._alphas[i] = new_a1
+        self._alphas[j] = new_a2
+        return True
+
+    # getting predictions for every datapoint in the training dataset
+    def train(self, features: ndarray, labels: ndarray) -> tuple:
+        pred = np.array([self._get_prediction(x) for x in features])
+        acc = np.count_nonzero(np.sign(pred) == labels) / labels.shape[0]
+        return pred, acc
+
+    # the fitting method
+    def fit(self,) -> tuple:
+        for _ in range(self.iter):
+            for i, a in enumerate(self._alphas):
+                e = self._get_error(i)
+                if (self._y[i] * e < -self._tol and a < self._C) or (self._y[i] * e > self._tol and a > 0):
+                    j = choice(list(range(i)) + list(range(i + 1, len(self._y))))
+                    self._step(i, j, e)
+        return self.train(self._X, self._y)
+
+    def predict(self, X: ndarray) -> ndarray:
+        return np.sign(np.array([self._get_prediction(x) for x in X]))
+
+    # getting support vectors
+    def get_support_vectors(self, zero: float = 10e-5) -> ndarray:
+        return self._X[self._alphas > zero]
+
+    def save_model(self, path: str):
         dump(self, open(path, "wb"))
