@@ -16,8 +16,3 @@ def getFormattedCSICDatasets() -> pd.DataFrame:
         data_mining.saveDataCSIC()
     return pd.read_json(os.path.join(dataset_location, "csic.json"))
 
-
-def getFormattedDatasets() -> pd.DataFrame:
-    csic_df = getFormattedCSICDatasets()
-    ecml_df = getFormattedECMLDatasets()
-    return pd.concat([csic_df, ecml_df], ignore_index=True)

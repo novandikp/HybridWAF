@@ -4,8 +4,27 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8acabd73-4521-4919-801e-6b96305b7178" name="Changes" comment="Remove Ecml dataset">
+    <list default="true" id="8acabd73-4521-4919-801e-6b96305b7178" name="Changes" comment="Updating change with pyx for increase performance">
+      <change afterPath="$PROJECT_DIR$/setup.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_scenario/first_testing_scenario.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/ML-Based_WAF.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ML-Based_WAF.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_test/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_test/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_training/PSOSVM.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_training/PSOSVM.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_training/SVM.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_training/SVM.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_training/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_training/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/signatures.db" beforeDir="false" afterPath="$PROJECT_DIR$/database/signatures.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/datasets/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example.config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/example.config.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_result.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_scenario/alg_scenario.json" beforeDir="false" afterPath="$PROJECT_DIR$/train_scenario/alg_scenario.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_scenario/dataset_type_scenario.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_scenario/split_data_scenario.json" beforeDir="false" afterPath="$PROJECT_DIR$/train_scenario/split_data_scenario.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,6 +35,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Jupyter Notebook" />
+        <option value="Setup Script" />
         <option value="Python Script" />
       </list>
     </option>
@@ -35,23 +55,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;database.data.extractors.current.export.id&quot;: &quot;Comma-separated (CSV)_id&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;F:/Kuliah/Done/Kuliah/Semester 8/ML-Based_WAF/data_test&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.SVM.executor": "Run",
+    "Python.Training(75:25).executor": "Run",
+    "Python.setup.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "database.data.extractors.current.export.id": "Comma-separated (CSV)_id",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "F:/Kuliah/Done/Kuliah/Semester 8/ML-Based_WAF/train_scenario",
+    "settings.editor.selected.configurable": "reference.settings.ide.settings.notifications"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="F:\Kuliah\Done\Kuliah\Semester 8\ML-Based_WAF\train_scenario" />
+      <recent name="F:\Kuliah\Done\Kuliah\Semester 8\ML-Based_WAF" />
       <recent name="F:\Kuliah\Done\Kuliah\Semester 8\ML-Based_WAF\data_test" />
       <recent name="F:\Kuliah\Done\Kuliah\Semester 8\ML-Based_WAF\config" />
       <recent name="F:\Kuliah\Done\Kuliah\Semester 8\ML-Based_WAF\signature" />
-      <recent name="F:\Kuliah\Done\Kuliah\Semester 8\ML-Based_WAF\model" />
-      <recent name="F:\Kuliah\Done\Kuliah\Semester 8\ML-Based_WAF\data-mining" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="F:\Kuliah\Done\Kuliah\Semester 8\ML-Based_WAF\util" />
@@ -60,14 +83,82 @@
       <recent name="F:\Kuliah\Done\Kuliah\Semester 8\ML-Based_WAF\waf\classifier" />
     </key>
   </component>
+  <component name="RunManager">
+    <configuration name="Training(75:25)" type="PythonConfigurationType" factoryName="Python">
+      <module name="ML-Based_WAF" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="ML-Based_WAF" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="PARAMETERS" value="train --test-size 0.25" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-5de4e687c57e-c6172f9078bd-com.jetbrains.pycharm.ds.sharedIndexes.bundled-DS-233.13135.105" />
+        <option value="bundled-python-sdk-0509580d9d50-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.14494.241" />
       </set>
     </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8acabd73-4521-4919-801e-6b96305b7178" name="Changes" comment="Update evaluation function and update svm algotihm" />
+      <created>1713179248854</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1713179248854</updated>
+    </task>
+    <task id="LOCAL-00001" summary="Updating new algotihm for svm">
+      <option name="closed" value="true" />
+      <created>1713186050166</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1713186050166</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Update and add type in every function">
+      <option name="closed" value="true" />
+      <created>1713192340660</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1713192340660</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Reduce iteration and remove lmit data">
+      <option name="closed" value="true" />
+      <created>1713197186338</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1713197186338</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Updating change with pyx for increase performance">
+      <option name="closed" value="true" />
+      <created>1713338869466</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1713338869466</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
       <map>
@@ -83,6 +174,11 @@
     <MESSAGE value="Add new code" />
     <MESSAGE value="Remove Ecml dataset and remove config" />
     <MESSAGE value="Remove Ecml dataset" />
-    <option name="LAST_COMMIT_MESSAGE" value="Remove Ecml dataset" />
+    <MESSAGE value="Update evaluation function and update svm algotihm" />
+    <MESSAGE value="Updating new algotihm for svm" />
+    <MESSAGE value="Update and add type in every function" />
+    <MESSAGE value="Reduce iteration and remove lmit data" />
+    <MESSAGE value="Updating change with pyx for increase performance" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updating change with pyx for increase performance" />
   </component>
 </project>

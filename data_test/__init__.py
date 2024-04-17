@@ -3,7 +3,7 @@ import pandas as pd
 import datasets
 import feature_extraction as fe
 from sklearn.model_selection import train_test_split
-from model import minMax, model
+from model import load_model
 from util.LabelEncoder import LabelEncoder
 from signature import detect_signature, add_signature, remove_database
 import data_evaluation as de
@@ -11,10 +11,10 @@ import matplotlib.pyplot as plt
 
 
 def test(args):
-    # check
-    test_size = 0.25
     remove_database()
     dataset = datasets.getFormattedECMLDatasets()
+
+    model, minMax = load_model(args.variant)
 
     labelEncoder = LabelEncoder()
     X = fe.transform_data_with_time(dataset)
@@ -27,7 +27,7 @@ def test(args):
     XTransform = pd.DataFrame(XTransform, columns=X.columns)
     XTransform["time"] = timeX
     X_train, X_test, y_train, y_test = train_test_split(
-        XTransform, y, test_size=test_size, random_state=27
+        XTransform, y, test_size=args.test_size, random_state=27
     )
 
     # print train and test size

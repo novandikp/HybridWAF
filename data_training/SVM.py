@@ -9,7 +9,7 @@ pyximport.install(setup_args={"include_dirs": np.get_include()}, language_level=
 from . import _svm
 
 
-class SVM():
+class SVM:
     """Support vector machine (SVM).
 
     This is a binary SVM and is trained using the SMO algorithm.
@@ -75,7 +75,7 @@ class SVM():
 
     def __init__(self,
                  C: float = 1.0, gamma: float = 1.0,
-                 tol: float = 1e-4, maxiter: int = 30, numpasses: int = 5,
+                 tol: float = 1e-4, maxiter: int = 50, numpasses: int = 5,
                  random_state=None, verbose=0):
         self.C = C
         self.kernel = "rbf"
@@ -116,6 +116,8 @@ class SVM():
             K, y, self.alpha_, self.C, random_state, self.tol,
             self.numpasses, self.maxiter, self.verbose)
 
+        if self.verbose >= 2:
+            print("Intercept: ", self.intercept_)
         # only samples with nonzero coefficients are relevant for predictions
         support_vectors = np.nonzero(self.alpha_)
         self.alpha_ = self.alpha_[support_vectors]

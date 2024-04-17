@@ -5,11 +5,12 @@ from sklearn.preprocessing import MinMaxScaler
 from data_training.PSOSVM import PSOSVM
 from data_training.SVM import SVM
 from util.Notification import send_notification
-from data_evaluation import send_classification_report
+from data_evaluation import send_classification_report, evaluation
 from util.LabelEncoder import LabelEncoder
 from cloudpickle import dump
 import os
 import json
+from datetime import datetime
 
 
 def train(test_size: float = 0.25, dataset_type: str = "ecml", algorithm: str = "psosvm", config=None):
@@ -21,9 +22,8 @@ def train(test_size: float = 0.25, dataset_type: str = "ecml", algorithm: str = 
     elif dataset_type == "csic":
         dataset = datasets.getFormattedCSICDatasets()
     else:
-        dataset = datasets.getFormattedDatasets()
+        raise ValueError("Dataset type not found")
 
-    # dataset = dataset.groupby("type").head(1000)
     send_notification(config.NOTIFICATION, "Extracting features...")
     X = fe.transform_data(dataset)
 
@@ -33,7 +33,8 @@ def train(test_size: float = 0.25, dataset_type: str = "ecml", algorithm: str = 
     minMax = MinMaxScaler()
     minMax.fit(X, y)
     XTransform = minMax.transform(X)
-    dump(minMax, open(os.path.join(os.getcwd(), "model", "minmax_scaler.pkl"), "wb"))
+    filename_minmax_variants = f"minmax_scaler{algorithm}_{dataset_type}_{test_size}.pkl"
+    dump(minMax, open(os.path.join(os.getcwd(), "model", filename_minmax_variants), "wb"))
 
     send_notification(config.NOTIFICATION, f"Splitting dataset with test size: {test_size}...")
     X_train, X_test, y_train, y_test = train_test_split(
@@ -53,7 +54,7 @@ def train(test_size: float = 0.25, dataset_type: str = "ecml", algorithm: str = 
         svm.save_model(path_model)
     else:
         psosvm = PSOSVM(config)
-        psosvm.setData(X_train, y_train, val_size=0.2, random_state=1)
+        psosvm.setData(X_train, y_train, val_size=0.2)
         psosvm.train()
         y_pred = psosvm.predict(X_test)
         send_classification_report(config, y_test, y_pred)
@@ -62,6 +63,13 @@ def train(test_size: float = 0.25, dataset_type: str = "ecml", algorithm: str = 
         filename_model_variants = f"model_{algorithm}_{dataset_type}_{test_size}.pkl"
         path_model = os.path.join(os.getcwd(), "model", filename_model_variants)
         psosvm.save_best(path_model)
+
+        path_history = os.path.join(os.getcwd(), "history")
+        if not os.path.exists(path_history):
+            os.makedirs(path_history)
+        filename_history_variants = f"history_{algorithm}_{dataset_type}_{test_size}.csv"
+        psosvm.save_history(os.path.join(path_history, filename_history_variants))
+    return evaluation(y_test, y_pred)
 
 
 def training_model(args):
@@ -78,19 +86,40 @@ def training_model(args):
 
 def training_all_scenario(args):
     scenario_folder = os.path.join(os.getcwd(), "train_scenario")
-    # get all scenario in folder *.json
-    scenarios = [f for f in os.listdir(scenario_folder) if f.endswith(".json")]
+
+    if args.scenario is None:
+        scenarios = [f for f in os.listdir(scenario_folder) if f.endswith(".json")]
+    else:
+        scenarios = [f for f in os.listdir(scenario_folder) if f.endswith(".json") and
+                     (args.scenario is not None and f.startswith(args.scenario))]
+    scenario_result = []
     for fileName in scenarios:
         with open(os.path.join(scenario_folder, fileName)) as f:
             scenarioType = json.load(f)
             for scenario in scenarioType:
                 send_notification(args.config.NOTIFICATION,
-                                  f"Training scenario {scenario['name']}")
-                train(
+                                  f"Training scenario {scenario['name']} started")
+                accuracy, tpr, fpr, fdr = train(
                     test_size=scenario["test_size"],
                     dataset_type=scenario["dataset_type"],
                     algorithm=scenario["algorithm"],
                     config=args.config
                 )
+                send_notification(args.config.NOTIFICATION,
+                                  f"Training scenario {scenario['name']} finished")
+                scenario_result.append({
+                    "name": scenario["name"],
+                    "accuracy": accuracy,
+                    "tpr": tpr,
+                    "fpr": fpr,
+                    "fdr": fdr
+                })
 
+    # result_scenario_path
+    result_scenario_path = os.path.join(os.getcwd(), "result_scenario")
+    if not os.path.exists(result_scenario_path):
+        os.makedirs(result_scenario_path)
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    with open(os.path.join(result_scenario_path, f"result_scenario_{timestamp}.json"), "w") as f:
+        json.dump(scenario_result, f,)
     send_notification(args.config.NOTIFICATION, "Training all scenario is done")

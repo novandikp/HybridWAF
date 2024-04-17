@@ -18,7 +18,7 @@ class PSOSVM:
         self.y_train = None
         self.best_model = None
         self.num_passes = 5
-        self.tol = 1e-4
+        self.tol = 0.0001
         self.history = []
         self.config = config
 
@@ -80,6 +80,7 @@ class PSOSVM:
                     "train_error": fitness_cadidate[0],
                     "gamma": particle_position_vector[i][0],
                     "c": particle_position_vector[i][1],
+                    "time": str(time.time() - start),
                 }
                 self.history.append(history_train)
                 if pbest_fitness_value[i] > fitness_cadidate[1]:

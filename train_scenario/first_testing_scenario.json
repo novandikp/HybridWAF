@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Skenario PSOSVM ECML dataset 75:25",
+    "test_size": 0.25,
+    "dataset_type": "ecml",
+    "algorithm": "psosvm"
+  },
+  {
+    "name": "Skenario PSOSVM CSIC dataset 75:25",
+    "test_size": 0.25,
+    "dataset_type": "csic",
+    "algorithm": "psosvm"
+  },
+  {
+    "name": "Skenario SVM ECML dataset 75:25",
+    "test_size": 0.25,
+    "dataset_type": "ecml",
+    "algorithm": "svm"
+  },
+  {
+    "name": "Skenario SVM CSIC dataset 75:25",
+    "test_size": 0.25,
+    "dataset_type": "csic",
+    "algorithm": "svm"
+  }
+]

@@ -1,14 +1,14 @@
 [
   {
-    "name": "Skenario SVM",
+    "name": "Skenario CSIC SVM 75:25",
     "test_size": 0.25,
-    "dataset_type": "all",
+    "dataset_type": "csic",
     "algorithm": "svm"
   },
   {
-    "name": "Skenario PSO-SVM",
+    "name": "Skenario ECML SVM 75:25",
     "test_size": 0.25,
-    "dataset_type": "all",
-    "algorithm": "psosvm"
+    "dataset_type": "ecml",
+    "algorithm": "svm"
   }
 ]

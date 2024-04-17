@@ -1,20 +1,38 @@
 [
   {
-    "name": "Skenario dataset 70:30",
-    "test_size": 0.3,
-    "dataset_type": "all",
+    "name": "Skenario ECML dataset 75:25",
+    "test_size": 0.25,
+    "dataset_type": "ecml",
     "algorithm": "psosvm"
   },
   {
-    "name": "Skenario dataset 80:20",
+    "name": "Skenario ECML dataset 80:20",
     "test_size": 0.2,
-    "dataset_type": "all",
+    "dataset_type": "ecml",
     "algorithm": "psosvm"
   },
   {
-    "name": "Skenario dataset 90:10",
-    "test_size": 0.1,
-    "dataset_type": "all",
+    "name": "Skenario ECML dataset 85:15",
+    "test_size": 0.15,
+    "dataset_type": "ecml",
+    "algorithm": "psosvm"
+  },
+  {
+    "name": "Skenario CSIC dataset 75:25",
+    "test_size": 0.25,
+    "dataset_type": "csic",
+    "algorithm": "psosvm"
+  },
+  {
+    "name": "Skenario CSIC dataset 80:20",
+    "test_size": 0.2,
+    "dataset_type": "csic",
+    "algorithm": "psosvm"
+  },
+  {
+    "name": "Skenario CSIC dataset 85:15",
+    "test_size": 0.15,
+    "dataset_type": "csic",
     "algorithm": "psosvm"
   }
 ]
