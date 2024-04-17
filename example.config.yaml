@@ -1,0 +1,13 @@
+  PSO:
+    n_iterations:  10
+    n_particles: 20
+    c1: 2.05
+    c2: 2.05
+    W: 0.72984
+    svm_n_iterations: 5
+  NOTIFICATION:
+    token: "123"
+    chat_id: "123"
+    telebot: False
+    log: True
+

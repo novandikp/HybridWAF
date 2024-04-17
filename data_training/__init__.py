@@ -42,8 +42,8 @@ def train(test_size: float = 0.25, dataset_type: str = "ecml", algorithm: str = 
 
     send_notification(config.NOTIFICATION, "Training model...")
     if algorithm == "svm":
-        svm = SVM(X_train, y_train, kernel="rbf")
-        svm.fit()
+        svm = SVM()
+        svm.fit(X_train, y_train)
         y_pred = svm.predict(X_test)
         send_classification_report(config, y_test, y_pred)
 

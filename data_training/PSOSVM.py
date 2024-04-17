@@ -17,6 +17,8 @@ class PSOSVM:
         self.y_test = None
         self.y_train = None
         self.best_model = None
+        self.num_passes = 5
+        self.tol = 1e-4
         self.history = []
         self.config = config
 
@@ -34,8 +36,9 @@ class PSOSVM:
             c = 0.0001
 
         # svc = SVC(kernel="rbf", gamma=gamma, C=c)
-        svc = SVM(self.x_train, self.y_train, gamma=gamma, c=c, kernel="rbf", iter=5)
-        svc.fit()
+        svc = SVM(C=c, gamma=gamma)
+
+        svc.fit(self.x_train, self.y_train)
         y_train_pred = svc.predict(self.x_train)
         y_test_pred = svc.predict(self.x_test)
         return (
@@ -55,10 +58,11 @@ class PSOSVM:
         pbest_position = particle_position_vector
         pbest_fitness_value = np.array([float("inf") for _ in range(self.config.PSO.n_particles)])
         gbest_fitness_value = np.array([float("inf"), float("inf")])
+        gbest_fitness_value_prev = np.array([float("inf"), float("inf")])
         gbest_position = np.array([float("inf"), float("inf")])
         velocity_vector = [np.array([0, 0]) for _ in range(self.config.PSO.n_particles)]
         iteration = 0
-
+        passes = 0
         while iteration < self.config.PSO.n_iterations:
             for i in range(self.config.PSO.n_particles):
                 send_notification(self.config.NOTIFICATION, f"particle- {i} iteration: {iteration}")
@@ -103,6 +107,14 @@ class PSOSVM:
                 )
                 new_position = new_velocity + particle_position_vector[i]
                 particle_position_vector[i] = new_position
+
+            if iteration > 0 and gbest_fitness_value_prev[1] == gbest_fitness_value[1]:
+                passes += 1
+                if passes >= self.num_passes:
+                    break
+            else:
+                passes = 0
+                gbest_fitness_value_prev = gbest_fitness_value
             iteration = iteration + 1
 
     def predict(self, x: ndarray):

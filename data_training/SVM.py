@@ -1,129 +1,162 @@
 import numpy as np
 from numpy import ndarray
-from random import choice
 from cloudpickle import dump
+from sklearn.metrics.pairwise import pairwise_kernels
+from sklearn.utils import check_array, check_random_state
+import pyximport
+
+pyximport.install(setup_args={"include_dirs": np.get_include()}, language_level="3")
+from . import _svm
 
 
-class SVM:
-    def __init__(self, X: ndarray, y: ndarray, kernel: str, c: float = 1, tol: float = 10e-8, gamma: float = 0.1, iter=10):
-        self._X = X
-        self._y = y
-        self._C = c
-        self._tol = tol
-        self._set_kernel_type(kernel, gamma)
-        self.iter = iter
-        np.random.seed(42)
-        self._alphas = np.random.uniform(0, c, size=len(y))
-        self._b = 0
+class SVM():
+    """Support vector machine (SVM).
 
-    # for a more organised initialization
-    def _set_kernel_type(self, kernel: str, gamma: float):
-        if kernel.lower() == 'linear':
-            self._kernel = self._linear_kernel
-        elif kernel.lower() == 'rbf':
-            self._kernel = self._rbf_kernel
-            self._gamma = gamma
-        else:
-            raise AttributeError(f'A kernel type "{kernel}" does not exist!')
+    This is a binary SVM and is trained using the SMO algorithm.
+    Reference: "The Simplified SMO Algorithm"
+    (http://math.unt.edu/~hsp0009/smo.pdf)
+    Based on Karpathy's svm.js implementation:
+    https://github.com/karpathy/svmjs
 
-    # a linear kernel function
-    def _linear_kernel(self, x1: ndarray, x2: ndarray) -> float:
-        return np.inner(x1, x2)
+    Parameters
+    ----------
+    C : float, optional (default: 1)
+        Penalty parameter C of the error term.
 
-    # a radial basis kernel function
-    def _rbf_kernel(self, x1: ndarray, x2: ndarray) -> float:
-        x1 = x1[np.newaxis, :] if np.ndim(x1) == 1 else x1
-        x2 = x2[np.newaxis, :] if np.ndim(x2) == 1 else x2
-        euclidean_dist = np.linalg.norm(x1[:, :, np.newaxis] - x2.T[np.newaxis, :, :], axis=1) ** 2
+    kernel : string, optional (default: 'rbf')
+         Specifies the kernel type to be used in the algorithm.
+         It must be one of 'linear', 'poly', 'rbf', 'sigmoid', 'precomputed' or
+         a callable.
+         If none is given, 'rbf' will be used. If a callable is given it is
+         used to pre-compute the kernel matrix from data matrices; that matrix
+         should be an array of shape ``(n_samples, n_samples)``
 
-        return np.exp(-self._gamma * np.squeeze(euclidean_dist))
+    degree : int, optional (default: 3)
+        Degree of the polynomial kernel function ('poly').
+        Ignored by all other kernels.
 
-    # getting one prediction
-    def _get_prediction(self, x: ndarray) -> float:
-        return np.sum(self._alphas * self._y * self._kernel(self._X, x)) + self._b
+    gamma : float, optional (default: 1)
+        Parameter for RBF kernel
 
-    # getting the bounds (considering our constraints)
-    def _get_bounds(self, i: int, j: int) -> tuple:
-        if self._y[i] != self._y[j]:
-            L = max(0, self._alphas[j] - self._alphas[i])
-            H = min(self._C, self._C + self._alphas[j] - self._alphas[i])
-        else:
-            L = max(0, self._alphas[i] + self._alphas[j] - self._C)
-            H = min(self._C, self._alphas[i] + self._alphas[j])
-        return L, H
 
-    # calculating an error
-    def _get_error(self, i: int) -> float:
-        return self._get_prediction(self._X[i]) - self._y[i]
+    tol : float, optional (default: 1e-4)
+        Numerical tolerance. Usually this should not be modified.
 
-    # calculating eta
-    def _get_eta(self, x1: ndarray, x2: ndarray) -> float:
-        return 2 * self._kernel(x1, x2) - self._kernel(x1, x1) - self._kernel(x2, x2)
 
-    # clipping a new alpha wrt the bounds
-    def _clip_alpha(self, L: float, H: float, alpha: float) -> float:
-        if alpha >= H:
-            return H
-        elif alpha <= L:
-            return L
-        return alpha
+    maxiter : int, optional (default: 10000)
+        Maximum number of iterations
 
-    # calculating a threshold
-    def _get_threshold(self, i: int, j: int, new_a1: float, new_a2: float, e1: float, e2: float) -> float:
-        k_ii = self._kernel(self._X[i], self._X[i])
-        k_jj = self._kernel(self._X[j], self._X[j])
-        k_ij = self._kernel(self._X[i], self._X[j])
+    numpasses : int, optional (default: 10)
+        How many passes over data with no change before we halt? Increase for
+        more precision.
 
-        b1 = self._b - e1 - self._y[i] * (new_a1 - self._alphas[i]) * k_ii - self._y[j] * (
-                new_a2 - self._alphas[j]) * k_ij
-        b2 = self._b - e2 - self._y[i] * (new_a1 - self._alphas[i]) * k_ij - self._y[j] * (
-                new_a2 - self._alphas[j]) * k_jj
+    random_state : int or RandomState instance or None (default)
+        Pseudo Random Number generator seed control. If None, use the
+        numpy.random singleton. Note that different initializations
+        might result in different local minima of the cost function.
 
-        if 0 < self._alphas[i] < self._C:
-            return b1
-        elif 0 < self._alphas[j] < self._C:
-            return b2
-        return (b1 + b2) / 2
+    verbose : int, optional (default: 0)
+        Verbosity level
 
-    # one step of SMO
-    def _step(self, i: int, j: int, e1: float) -> bool:
-        L, H = self._get_bounds(i, j)
-        e2 = self._get_error(j)
-        eta = self._get_eta(self._X[i], self._X[j])
+    Attributes
+    ----------
+    support_vectors_ : array-like, shape = [n_support_vectors, n_features]
+        Support vectors.
 
-        if eta >= 0 or L >= H:
-            return False
+    coef_ : array, shape = [n_features]
+        Weights assigned to the features (coefficients in the primal
+        problem). This is only available in the case of a linear kernel.
+        `coef_` is a readonly property derived from `dual_coef_` and
+        `support_vectors_`.
 
-        new_a2 = self._clip_alpha(L, H, self._alphas[j] - (self._y[j] * (e1 - e2)) / eta)
-        new_a1 = self._alphas[i] + self._y[i] * self._y[j] * (self._alphas[j] - new_a2)
+    intercept_ : float
+        Constant in decision function.
+    """
 
-        self._b = self._get_threshold(i, j, new_a1, new_a2, e1, e2)
-        self._alphas[i] = new_a1
-        self._alphas[j] = new_a2
-        return True
+    def __init__(self,
+                 C: float = 1.0, gamma: float = 1.0,
+                 tol: float = 1e-4, maxiter: int = 30, numpasses: int = 5,
+                 random_state=None, verbose=0):
+        self.C = C
+        self.kernel = "rbf"
+        self.gamma = gamma
+        self.tol = tol
+        self.maxiter = maxiter
+        self.numpasses = numpasses
+        self.random_state = random_state
+        self.verbose = verbose
 
-    # getting predictions for every datapoint in the training dataset
-    def train(self, features: ndarray, labels: ndarray) -> tuple:
-        pred = np.array([self._get_prediction(x) for x in features])
-        acc = np.count_nonzero(np.sign(pred) == labels) / labels.shape[0]
-        return pred, acc
+    def fit(self, X: ndarray, y: ndarray):
+        """Fit the model to data matrix X and target y.
 
-    # the fitting method
-    def fit(self,) -> tuple:
-        for _ in range(self.iter):
-            for i, a in enumerate(self._alphas):
-                e = self._get_error(i)
-                if (self._y[i] * e < -self._tol and a < self._C) or (self._y[i] * e > self._tol and a > 0):
-                    j = choice(list(range(i)) + list(range(i + 1, len(self._y))))
-                    self._step(i, j, e)
-        return self.train(self._X, self._y)
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_features)
+            The input data.
+
+        y : array-like, shape (n_samples,)
+            The class labels.
+
+        Returns
+        -------
+        self : returns a trained SVM
+        """
+        #  convert X and y is float
+        X = X.astype(float)
+        y = y.astype(float)
+
+        self.support_vectors_ = check_array(X)
+        self.y = check_array(y, ensure_2d=False)
+
+        random_state = check_random_state(self.random_state)
+
+        K = pairwise_kernels(X, metric=self.kernel, gamma=self.gamma)
+        self.alpha_ = np.zeros(X.shape[0])
+        self.intercept_ = _svm.smo(
+            K, y, self.alpha_, self.C, random_state, self.tol,
+            self.numpasses, self.maxiter, self.verbose)
+
+        # only samples with nonzero coefficients are relevant for predictions
+        support_vectors = np.nonzero(self.alpha_)
+        self.alpha_ = self.alpha_[support_vectors]
+        self.support_vectors_ = X[support_vectors]
+        self.y = y[support_vectors]
+
+        return self
+
+    def decision_function(self, X: ndarray) -> ndarray:
+        """Decision function of the SVM.
+
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_features)
+            The input data.
+
+        Returns
+        -------
+        y : array-like, shape (n_samples,)
+            The values of decision function.
+        """
+        X = check_array(X)
+        K = pairwise_kernels(X, self.support_vectors_, metric=self.kernel,
+                             gamma=self.gamma)
+        return (self.intercept_ + np.sum(self.alpha_[np.newaxis, :] *
+                                         self.y * K, axis=1))
 
     def predict(self, X: ndarray) -> ndarray:
-        return np.sign(np.array([self._get_prediction(x) for x in X]))
+        """Predict class labels.
 
-    # getting support vectors
-    def get_support_vectors(self, zero: float = 10e-5) -> ndarray:
-        return self._X[self._alphas > zero]
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_features)
+            The input data.
+
+        Returns
+        -------
+        y : array-like, shape (n_samples,)
+            The predicted classes.
+        """
+        return np.sign(self.decision_function(X))
 
     def save_model(self, path: str):
         dump(self, open(path, "wb"))

@@ -3,14 +3,20 @@ import pandas as pd
 import datasets
 import feature_extraction as fe
 from sklearn.model_selection import train_test_split
-from model import minMax, labelEncoder, model
+from model import minMax, model
+from util.LabelEncoder import LabelEncoder
 from signature import detect_signature, add_signature, remove_database
 import data_evaluation as de
 import matplotlib.pyplot as plt
 
-def test(test_size=0.25):
+
+def test(args):
+    # check
+    test_size = 0.25
     remove_database()
     dataset = datasets.getFormattedECMLDatasets()
+
+    labelEncoder = LabelEncoder()
     X = fe.transform_data_with_time(dataset)
     y = labelEncoder.transform(dataset["type"])
 
@@ -42,7 +48,7 @@ def test(test_size=0.25):
             resultSignature = detect_signature(x)
             real_condition.append(y)
             if resultSignature is None:
-                result = model.train([x])
+                result = model.predict([x])
                 add_signature(x, bool(result[0]))
                 end_time = time.time()
                 classification_time = end_time - start_time
@@ -71,8 +77,6 @@ def test(test_size=0.25):
         }
     )
 
-
-
     result.to_csv("test_result.csv")
     anomaly_based = result[result["model_used"] == "Anomaly Based Detection"]
     signature_based = result[result["model_used"] == "Signature Based Detection"]
@@ -90,7 +94,3 @@ def test(test_size=0.25):
     plt.ylabel("Time (ms)")
     plt.legend()
     plt.show()
-
-
-
-
