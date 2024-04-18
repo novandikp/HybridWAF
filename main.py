@@ -28,10 +28,10 @@ parser_test.set_defaults(func=test)
 config = BaseConfig(parse_config("config.yaml"))
 
 if __name__ == "__main__":
-    # try:
+    try:
         arg = sys.argv[1:]
         arg = parser.parse_args(arg)
         arg.config = config
         arg.func(arg)
-    # except Exception as e:
-    #     send_notification(config.NOTIFICATION, f"Error: {e}")
+    except Exception as e:
+        send_notification(config.NOTIFICATION, f"Error: {e}")

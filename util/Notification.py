@@ -6,9 +6,12 @@ import datetime
 def send_notification(config, message: str):
     print(message)
     if config.telebot:
-        baseUrl = f"https://api.telegram.org/bot{config.token}"
-        url = f"{baseUrl}/sendMessage?chat_id={config.chat_id}&text={message}"
-        requests.get(url)
+        try:
+            baseUrl = f"https://api.telegram.org/bot{config.token}"
+            url = f"{baseUrl}/sendMessage?chat_id={config.chat_id}&text={message}"
+            requests.get(url)
+        except Exception as e:
+            print(f"Error send notification: {e}")
     if config.log:
         logs_path = os.path.join(os.getcwd(), "logs")
         if not os.path.exists(logs_path):
