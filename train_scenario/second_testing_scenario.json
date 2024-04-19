@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Skenario SVM ECML dataset 65:35",
+    "test_size": 0.35,
+    "dataset_type": "ecml",
+    "algorithm": "svm"
+  },
+  {
+    "name": "Skenario SVM CSIC dataset 65:35",
+    "test_size": 0.35,
+    "dataset_type": "csic",
+    "algorithm": "svm"
+  },
+  {
+    "name": "Skenario SVM ECML dataset 70:30",
+    "test_size": 0.3,
+    "dataset_type": "ecml",
+    "algorithm": "svm"
+  },
+  {
+    "name": "Skenario SVM CSIC dataset 70:30",
+    "test_size": 0.3,
+    "dataset_type": "csic",
+    "algorithm": "svm"
+  },
+  {
+    "name": "Skenario SVM ECML dataset 80:20",
+    "test_size": 0.2,
+    "dataset_type": "ecml",
+    "algorithm": "svm"
+  },
+  {
+    "name": "Skenario SVM CSIC dataset 80:20",
+    "test_size": 0.2,
+    "dataset_type": "csic",
+    "algorithm": "svm"
+  }
+]
