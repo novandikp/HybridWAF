@@ -8,89 +8,80 @@ from util.LabelEncoder import LabelEncoder
 from signature import detect_signature, add_signature, remove_database
 import data_evaluation as de
 import matplotlib.pyplot as plt
+import os
+from util.Notification import send_notification
 
 
-def test(args):
-    remove_database()
-    dataset = datasets.getFormattedECMLDatasets()
+class Argument:
+    def __init__(self, d=None):
+        if d is not None:
+            for key, value in d.items():
+                setattr(self, key, value)
 
-    model, minMax = load_model(args.variant)
 
+def test_new(args):
+    variant = args.variant
+    config = args.config
+    print(variant)
+    test_size = float(variant.split("_")[2])
+    dataset_type = variant.split("_")[1]
+
+    if dataset_type == "ecml":
+        dataset = datasets.getFormattedECMLDatasets()
+    elif dataset_type == "csic":
+        dataset = datasets.getFormattedCSICDatasets()
+    else:
+        raise ValueError("Dataset type not found")
+
+    send_notification(config.NOTIFICATION, f"Testing with variant: {variant}")
+
+    X = fe.transform_data(dataset)
+    send_notification(config.NOTIFICATION, "Extracting features...")
     labelEncoder = LabelEncoder()
-    X = fe.transform_data_with_time(dataset)
     y = labelEncoder.transform(dataset["type"])
-
-    timeX = X["time"]
-    X = X.drop(columns=["time"])
+    model, minMax = load_model(variant)
     XTransform = minMax.transform(X)
-    # add time to XTransform
-    XTransform = pd.DataFrame(XTransform, columns=X.columns)
-    XTransform["time"] = timeX
+
     X_train, X_test, y_train, y_test = train_test_split(
-        XTransform, y, test_size=args.test_size, random_state=27
+        XTransform, y, test_size=test_size, random_state=27
     )
+    y_pred = model.predict(X_test)
+    de.send_classification_report(config, y_test, y_pred)
+    accuracy, tpr, fpr, fdr = de.evaluation(y_test, y_pred)
+    return accuracy, tpr, fpr, fdr, variant
 
-    # print train and test size
-    print("Train size: ", X_train.shape)
-    print("Test size: ", X_test.shape)
-    test_time = X_test["time"]
-    X_test = X_test.drop(columns=["time"])
-    result_prediction = []
-    real_condition = []
-    time_predict = []
-    model_used = []
-    # iterate 2 times
-    for i in range(2):
-        print(i)
-        # iterate over x_test and y_test
-        for x, y, z in zip(X_test.values, y_test, test_time):
-            start_time = time.time()
-            resultSignature = detect_signature(x)
-            real_condition.append(y)
-            if resultSignature is None:
-                result = model.predict([x])
-                add_signature(x, bool(result[0]))
-                end_time = time.time()
-                classification_time = end_time - start_time
-                classification_time = round((classification_time + z) * 1000, 2)
-                result_prediction.append(result[0])
-                time_predict.append(classification_time)
-                model_used.append("Anomaly Based Detection")
-            else:
-                end_time = time.time()
-                classification_time = end_time - start_time
-                classification_time = round((classification_time + z) * 1000, 2)
-                result_prediction.append(int(resultSignature))
-                time_predict.append(classification_time)
-                model_used.append("Signature Based Detection")
 
-        if i == 0:
-            de.classification_report(real_condition, result_prediction)
+def test_all(args):
+    path_model = os.path.join(os.getcwd(), "model")
+    result = []
+    for f in os.listdir(path_model):
+        if f.startswith("model_") and f.endswith(".pkl"):
+            argument = {
+                "variant": f.replace(".pkl", "").replace("model_", ""),
+                "config": args.config,
+            }
 
-    # save history to csv
-    result = pd.DataFrame(
-        {
-            "real_condition": real_condition,
-            "result_prediction": result_prediction,
-            "time_predict": time_predict,
-            "model_used": model_used,
-        }
-    )
+            result_test = test_new(Argument(argument))
+            result.append(result_test)
 
-    result.to_csv("test_result.csv")
-    anomaly_based = result[result["model_used"] == "Anomaly Based Detection"]
-    signature_based = result[result["model_used"] == "Signature Based Detection"]
+    # save result to csv
+    result = pd.DataFrame(result, columns=["accuracy", "tpr", "fpr", "fdr", "variant"])
+    path_result = os.path.join(os.getcwd(), "result")
+    if not os.path.exists(path_result):
+        os.makedirs(path_result)
+    filename_result = f"result_all_test.csv"
+    result.to_csv(os.path.join(path_result, filename_result), index=False)
 
-    # reset index
-    anomaly_based = anomaly_based.reset_index()
-    signature_based = signature_based.reset_index()
-
-    anomaly_based = anomaly_based.head(20)
-    signature_based = signature_based.head(20)
-
-    plt.plot(anomaly_based.index, anomaly_based["time_predict"], label="Anomaly Based Detection")
-    plt.plot(signature_based.index, signature_based["time_predict"], label="Signature Based Detection")
-    plt.xlabel("Index")
-    plt.ylabel("Time (ms)")
-    plt.legend()
-    plt.show()
+    # Search for the best model Accuracy
+    best_accuracy = result.loc[result["accuracy"].idxmax()]
+    send_notification(args.config.NOTIFICATION,
+                      f"Best Accuracy: {best_accuracy['accuracy']} with variant: {best_accuracy['variant']}")
+    # Search for the best model TPR
+    best_tpr = result.loc[result["tpr"].idxmax()]
+    send_notification(args.config.NOTIFICATION, f"Best TPR: {best_tpr['tpr']} with variant: {best_tpr['variant']}")
+    # Search for the best model FPR
+    best_fpr = result.loc[result["fpr"].idxmin()]
+    send_notification(args.config.NOTIFICATION, f"Best FPR: {best_fpr['fpr']} with variant: {best_fpr['variant']}")
+    # Search for the best model FDR
+    best_fdr = result.loc[result["fdr"].idxmin()]
+    send_notification(args.config.NOTIFICATION, f"Best FDR: {best_fdr['fdr']} with variant: {best_fdr['variant']}")

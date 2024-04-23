@@ -3,7 +3,7 @@ import argparse
 from util.Notification import send_notification
 from data_training import training_model, training_all_scenario
 from pyaml_env import parse_config, BaseConfig
-from data_test import test
+from data_test import test_all, test_new
 
 parser = argparse.ArgumentParser(description="MLBased WAF")
 subparser = parser.add_subparsers(required=True, help="Available commands")
@@ -21,9 +21,11 @@ parser_train_all.set_defaults(func=training_all_scenario)
 
 # add argument test
 parser_test = subparser.add_parser("test", help="test the model")
-parser_test.add_argument("--test-size", help="specify test size for training", type=float, default=0.2)
-parser_test.add_argument("--variant", help="specify variant to test", type=str, default="psosvm_ecml_0.25")
-parser_test.set_defaults(func=test)
+parser_test.set_defaults(func=test_all)
+
+parser_test2 = subparser.add_parser("test_new", help="test the model")
+parser_test2.add_argument("--variant", help="specify variant to test", type=str, default="psosvm_ecml_0.25")
+parser_test2.set_defaults(func=test_new)
 
 config = BaseConfig(parse_config("config.yaml"))
 
