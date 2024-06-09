@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from data_training.PSOSVM import PSOSVM
 from data_training.SVM import SVM
-from util.Notification import send_notification
+from util.Notification import send_notification, send_model
 from data_evaluation import send_classification_report, evaluation
 from util.LabelEncoder import LabelEncoder
 from cloudpickle import dump
@@ -13,7 +13,8 @@ import json
 from datetime import datetime
 
 
-def train(test_size: float = 0.25, dataset_type: str = "ecml", algorithm: str = "psosvm", config=None):
+def train(test_size: float = 0.25, dataset_type: str = "ecml", algorithm: str = "psosvm", fitness: str = "accuracy",
+          config=None):
     send_notification(config.NOTIFICATION,
                       f"Training with test size: {test_size}, dataset: {dataset_type}, algorithm: {algorithm}")
     send_notification(config.NOTIFICATION, "Loading dataset...")
@@ -38,7 +39,7 @@ def train(test_size: float = 0.25, dataset_type: str = "ecml", algorithm: str = 
 
     send_notification(config.NOTIFICATION, f"Splitting dataset with test size: {test_size}...")
     X_train, X_test, y_train, y_test = train_test_split(
-        XTransform, y, test_size=test_size, random_state=27
+        XTransform, y, test_size=test_size, random_state=42
     )
 
     send_notification(config.NOTIFICATION, "Training model...")
@@ -55,6 +56,7 @@ def train(test_size: float = 0.25, dataset_type: str = "ecml", algorithm: str = 
     else:
         psosvm = PSOSVM(config)
         psosvm.setData(X_train, y_train, val_size=0.2)
+        psosvm.setFitnessFunction(fitness)
         psosvm.train()
         y_pred = psosvm.predict(X_test)
         send_classification_report(config, y_test, y_pred)
@@ -99,14 +101,18 @@ def training_all_scenario(args):
             for scenario in scenarioType:
                 send_notification(args.config.NOTIFICATION,
                                   f"Training scenario {scenario['name']} started")
+                timeStart = datetime.now()
                 accuracy, tpr, fpr, fdr = train(
                     test_size=scenario["test_size"],
                     dataset_type=scenario["dataset_type"],
                     algorithm=scenario["algorithm"],
+                    fitness=scenario["fitness"],
                     config=args.config
                 )
+                timeEnd = datetime.now()
                 send_notification(args.config.NOTIFICATION,
-                                  f"Training scenario {scenario['name']} finished")
+                                  f"Training scenario {scenario['name']} finished in {timeEnd - timeStart} seconds")
+                send_model(args.config.NOTIFICATION, scenario["algorithm"], scenario["dataset_type"], scenario["test_size"])
                 scenario_result.append({
                     "name": scenario["name"],
                     "accuracy": accuracy,
@@ -121,5 +127,5 @@ def training_all_scenario(args):
         os.makedirs(result_scenario_path)
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     with open(os.path.join(result_scenario_path, f"result_scenario_{timestamp}.json"), "w") as f:
-        json.dump(scenario_result, f,)
+        json.dump(scenario_result, f, )
     send_notification(args.config.NOTIFICATION, "Training all scenario is done")

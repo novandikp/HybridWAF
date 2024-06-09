@@ -13,6 +13,7 @@ parser_train = subparser.add_parser("train", help="train the model")
 parser_train.add_argument("--test-size", help="specify test size for training", type=float, default=0.2)
 parser_train.add_argument("--dataset", help="specify dataset to train", choices=["ecml", "csic", "all"], default="ecml")
 parser_train.add_argument("--alg", help="specify algorithm to train", choices=["psosvm", "svm"], default="psosvm")
+parser_train.add_argument("--fitness", help="specify fitness function to train PSOSVM", choices=["accuracy", "tpr", "fpr", "fdr"], default="accuracy")
 parser_train.set_defaults(func=training_model)
 
 parser_train_all = subparser.add_parser("train_all", help="train the model with all variants")

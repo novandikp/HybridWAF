@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Skenario CSIC dataset 75:25",
+    "test_size": 0.25,
+    "dataset_type": "csic",
+    "algorithm": "psosvm",
+    "fitness": "accuracy"
+  },
+  {
+    "name": "Skenario CSIC dataset 80:20",
+    "test_size": 0.2,
+    "dataset_type": "csic",
+    "algorithm": "psosvm",
+    "fitness": "accuracy"
+  },
+  {
+    "name": "Skenario CSIC dataset 85:15",
+    "test_size": 0.15,
+    "dataset_type": "csic",
+    "algorithm": "psosvm",
+    "fitness": "accuracy"
+  },
+  {
+    "name": "Skenario SVM CSIC dataset 85:15",
+    "test_size": 0.15,
+    "dataset_type": "csic",
+    "fitness": "accuracy",
+    "algorithm": "svm"
+  },
+  {
+    "name": "Skenario SVM CSIC dataset 80:20",
+    "test_size": 0.2,
+    "dataset_type": "csic",
+    "fitness": "accuracy",
+    "algorithm": "svm"
+  }
+]

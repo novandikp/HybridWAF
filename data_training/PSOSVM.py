@@ -1,9 +1,10 @@
 import numpy as np
 from numpy import ndarray
 import random
+
+from data_evaluation import evaluation
 from util.Notification import send_notification
 from data_training.SVM import SVM
-from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 import os
 import time
@@ -16,6 +17,7 @@ class PSOSVM:
         self.x_train = None
         self.y_test = None
         self.y_train = None
+        self.keyFitnessFunction = "accuracy"
         self.best_model = None
         self.num_passes = 5
         self.tol = 0.0001
@@ -26,6 +28,9 @@ class PSOSVM:
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
             x, y, test_size=val_size, random_state=random_state
         )
+
+    def setFitnessFunction(self, keyFitnessFunction: str):
+        self.keyFitnessFunction = keyFitnessFunction
 
     def fitness_function(self, position: tuple) -> tuple:
         (gamma, c) = position
@@ -41,9 +46,26 @@ class PSOSVM:
         svc.fit(self.x_train, self.y_train)
         y_train_pred = svc.predict(self.x_train)
         y_test_pred = svc.predict(self.x_test)
+        accuracyTrain, tprTrain, fprTrain, fdrTrain = evaluation(self.y_train, y_train_pred)
+        accuracyTest, tprTest, fprTest, fdrTest = evaluation(self.y_test, y_test_pred)
+        if self.keyFitnessFunction == "accuracy":
+            score_train = 1 - accuracyTrain
+            score_test = 1 - accuracyTest
+        elif self.keyFitnessFunction == "tpr":
+            score_train = 1 - tprTrain
+            score_test = 1 - tprTest
+        elif self.keyFitnessFunction == "fpr":
+            score_train = fprTrain
+            score_test = fprTest
+        elif self.keyFitnessFunction == "fdr":
+            score_train = fdrTrain
+            score_test = fdrTest
+        else:
+            score_train = accuracyTrain
+            score_test = accuracyTest
         return (
-            1 - accuracy_score(self.y_train, y_train_pred),
-            1 - accuracy_score(self.y_test, y_test_pred),
+            score_train,
+            score_test,
             svc,
         )
 
