@@ -18,14 +18,14 @@ sudo apt install -y python3-pip
 # Install all the required packages
 python3.9 -m pip install -r requirements.txt
 
-
+mkdir ./datasets/ecml
 cd ./datasets/ecml
 
-wget https://www.dropbox.com/scl/fi/kp9q56vyzmce6gqa34bd0/learning_dataset.xml?rlkey=ozsvjb9fqrx4qq797qc48yfea&st=uxix0sxy&dl=1 -O learning_dataset.xml
+wget -O learning_dataset.xml "https://www.dropbox.com/scl/fi/kp9q56vyzmce6gqa34bd0/learning_dataset.xml?rlkey=ozsvjb9fqrx4qq797qc48yfea&st=uxix0sxy&dl=1"
 
 cd ../formatted
 
-wget https://www.dropbox.com/scl/fi/hgetyflqk9fsii6p2l31m/ecml.json?rlkey=kgd5lumu969u8q6ggmmr8lojo&st=l24pwm3u&dl=1 -O ecml.json
+wget -O ecml.json "https://www.dropbox.com/scl/fi/hgetyflqk9fsii6p2l31m/ecml.json?rlkey=kgd5lumu969u8q6ggmmr8lojo&st=l24pwm3u&dl=1"
 
 
 
