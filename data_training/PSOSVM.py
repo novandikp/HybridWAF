@@ -19,8 +19,8 @@ class PSOSVM:
         self.y_train = None
         self.keyFitnessFunction = "accuracy"
         self.best_model = None
-        self.num_passes = 5
-        self.tol = 0.0001
+        self.num_passes = 3
+        self.tol = 0.001
         self.history = []
         self.config = config
 
@@ -40,7 +40,6 @@ class PSOSVM:
         if c <= 0:
             c = 0.0001
 
-        # svc = SVC(kernel="rbf", gamma=gamma, C=c)
         svc = SVM(C=c, gamma=gamma)
 
         svc.fit(self.x_train, self.y_train)
@@ -130,15 +129,16 @@ class PSOSVM:
                 )
                 new_position = new_velocity + particle_position_vector[i]
                 particle_position_vector[i] = new_position
-
-            if iteration > 0 and gbest_fitness_value_prev[1] == gbest_fitness_value[1]:
-                passes += 1
-                if passes >= self.num_passes:
-                    break
-            else:
-                passes = 0
-                gbest_fitness_value_prev = gbest_fitness_value
-            iteration = iteration + 1
+            if iteration > 0:
+                improvement = gbest_fitness_value_prev[1] - gbest_fitness_value[1]
+                if improvement <= self.tol and gbest_fitness_value_prev[1] > gbest_fitness_value[1]:
+                    passes += 1
+                    if passes >= self.num_passes:
+                        break
+                else:
+                    passes = 0
+            gbest_fitness_value_prev = gbest_fitness_value
+            iteration += 1
 
     def predict(self, x: ndarray):
         return self.best_model.predict(x)

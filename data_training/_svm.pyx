@@ -9,18 +9,13 @@ import numpy as np
 cpdef double smo(
         np.ndarray[np.float_t, ndim=2] K,
         np.ndarray[np.float_t, ndim=1] y,
-        np.ndarray[np.float_t, ndim=1] dual_coef_,
+        np.ndarray[np.float_t, ndim=1] alpha_,
         double C,
         object random_state,
         double tol,
         int numpasses,
         int maxiter,
         int verbose):
-    """Sequential Minimal Optimization (SMO) for binary SVM.
-
-    This is a simplified implementation that is not guaranteed to converge to
-    the global optimum for all datasets.
-    """
     cdef int n_samples = K.shape[0]
     cdef int it = 0
     cdef int passes = 0
@@ -34,18 +29,18 @@ cpdef double smo(
     while passes < numpasses and it < maxiter:
         alphas_changed = 0
         for i in range(n_samples):
-            Ei = _margins_kernel(yK[i], dual_coef_, b) - y[i]
+            Ei = _margins_kernel(yK[i], alpha_, b) - y[i]
             yEi = y[i] * Ei
-            if ((yEi < -tol and dual_coef_[i] < C) or (yEi > tol and dual_coef_[i] > 0)):
+            if ((yEi < -tol and alpha_[i] < C) or (yEi > tol and alpha_[i] > 0)):
                 # alphas[i] needs updating! Pick a j to update it with
                 j = i
                 while j == i:
                     j = random_state.randint(n_samples)
-                Ej = _margins_kernel(yK[j], dual_coef_, b) - y[j]
+                Ej = _margins_kernel(yK[j], alpha_, b) - y[j]
 
                 # compute L and H bounds for j to ensure we're in [0, C]x[0, C]
-                ai = dual_coef_[i]
-                aj = dual_coef_[j]
+                ai = alpha_[i]
+                aj = alpha_[j]
                 if y[i] == y[j]:
                     L = max(0, ai + aj - C)
                     H = min(C, ai + aj)
@@ -67,9 +62,9 @@ cpdef double smo(
                 newaj = max(newaj, L)
                 if abs(aj - newaj) < 1e-4:
                     continue
-                dual_coef_[j] = newaj
+                alpha_[j] = newaj
                 newai = ai + y[i] * y[j] * (aj - newaj)
-                dual_coef_[i] = newai
+                alpha_[i] = newai
 
                 # update the bias term
                 b1 = (b - Ei - y[i] * (newai - ai) * K[i, i] -

@@ -43,7 +43,7 @@ def test_new(args):
     XTransform = minMax.transform(X)
 
     X_train, X_test, y_train, y_test = train_test_split(
-        XTransform, y, test_size=test_size, random_state=27
+        XTransform, y, test_size=test_size, random_state=42
     )
     y_pred = model.predict(X_test)
     de.send_classification_report(config, y_test, y_pred)
