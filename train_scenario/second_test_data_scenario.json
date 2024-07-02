@@ -19,5 +19,47 @@
     "dataset_type": "ecml",
     "algorithm": "psosvm",
     "fitness": "accuracy"
+  },
+  {
+    "name": "Skenario TPR ECML dataset 75:25",
+    "test_size": 0.25,
+    "dataset_type": "ecml",
+    "algorithm": "psosvm",
+    "fitness": "tpr"
+  },
+  {
+    "name": "Skenario TPR ECML dataset 80:20",
+    "test_size": 0.2,
+    "dataset_type": "ecml",
+    "algorithm": "psosvm",
+    "fitness": "tpr"
+  },
+  {
+    "name": "Skenario TPR ECML dataset 85:15",
+    "test_size": 0.15,
+    "dataset_type": "ecml",
+    "algorithm": "psosvm",
+    "fitness": "tpr"
+  },
+  {
+    "name": "Skenario SVM ECML dataset 75:25",
+    "test_size": 0.25,
+    "dataset_type": "ecml",
+    "algorithm": "svm",
+    "fitness": "accuracy"
+  },
+  {
+    "name": "Skenario SVM ECML dataset 80:20",
+    "test_size": 0.2,
+    "dataset_type": "ecml",
+    "algorithm": "svm",
+    "fitness": "accuracy"
+  },
+  {
+    "name": "Skenario SVM ECML dataset 85:15",
+    "test_size": 0.15,
+    "dataset_type": "ecml",
+    "algorithm": "svm",
+    "fitness": "accuracy"
   }
 ]
