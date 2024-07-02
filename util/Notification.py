@@ -21,13 +21,13 @@ def send_notification(config, message: str):
             f.write(f"{datetime.datetime.now()} - {message}\n")
 
 
-def send_model(config, algorithm, dataset_type, test_size):
+def send_model(config, algorithm, dataset_type, test_size, fitness):
     model_path = os.path.join(os.getcwd(), "model")
     if not os.path.exists(model_path):
         os.makedirs(model_path)
-    fileMinmax = f"minmax_scaler{algorithm}_{dataset_type}_{test_size}.pkl"
+    fileMinmax = f"minmax_scaler{algorithm}_{dataset_type}_{test_size}_{fitness}.pkl"
     # model_
-    fileModel = f"model_{algorithm}_{dataset_type}_{test_size}.pkl"
+    fileModel = f"model_{algorithm}_{dataset_type}_{test_size}_{fitness}.pkl"
     # send to telegram
     if config.telebot:
         try:

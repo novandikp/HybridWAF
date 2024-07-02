@@ -34,7 +34,7 @@ def train(test_size: float = 0.25, dataset_type: str = "ecml", algorithm: str = 
     minMax = MinMaxScaler()
     minMax.fit(X, y)
     XTransform = minMax.transform(X)
-    filename_minmax_variants = f"minmax_scaler{algorithm}_{dataset_type}_{test_size}.pkl"
+    filename_minmax_variants = f"minmax_scaler{algorithm}_{dataset_type}_{test_size}_{fitness}.pkl"
     dump(minMax, open(os.path.join(os.getcwd(), "model", filename_minmax_variants), "wb"))
 
     send_notification(config.NOTIFICATION, f"Splitting dataset with test size: {test_size}...")
@@ -50,7 +50,7 @@ def train(test_size: float = 0.25, dataset_type: str = "ecml", algorithm: str = 
         send_classification_report(config, y_test, y_pred)
 
         send_notification(config.NOTIFICATION, "Saving model...")
-        filename_model_variants = f"model_{algorithm}_{dataset_type}_{test_size}.pkl"
+        filename_model_variants = f"model_{algorithm}_{dataset_type}_{test_size}_{fitness}.pkl"
         path_model = os.path.join(os.getcwd(), "model", filename_model_variants)
         svm.save_model(path_model)
     else:
@@ -62,14 +62,14 @@ def train(test_size: float = 0.25, dataset_type: str = "ecml", algorithm: str = 
         send_classification_report(config, y_test, y_pred)
 
         send_notification(config.NOTIFICATION, "Saving model...")
-        filename_model_variants = f"model_{algorithm}_{dataset_type}_{test_size}.pkl"
+        filename_model_variants = f"model_{algorithm}_{dataset_type}_{test_size}_{fitness}.pkl"
         path_model = os.path.join(os.getcwd(), "model", filename_model_variants)
         psosvm.save_best(path_model)
 
         path_history = os.path.join(os.getcwd(), "history")
         if not os.path.exists(path_history):
             os.makedirs(path_history)
-        filename_history_variants = f"history_{algorithm}_{dataset_type}_{test_size}.csv"
+        filename_history_variants = f"history_{algorithm}_{dataset_type}_{test_size}_{fitness}.csv"
         psosvm.save_history(os.path.join(path_history, filename_history_variants))
     return evaluation(y_test, y_pred)
 
@@ -112,7 +112,7 @@ def training_all_scenario(args):
                 timeEnd = datetime.now()
                 send_notification(args.config.NOTIFICATION,
                                   f"Training scenario {scenario['name']} finished in {timeEnd - timeStart} seconds")
-                send_model(args.config.NOTIFICATION, scenario["algorithm"], scenario["dataset_type"], scenario["test_size"])
+                send_model(args.config.NOTIFICATION, scenario["algorithm"], scenario["dataset_type"], scenario["test_size"],scenario["fitness"])
                 scenario_result.append({
                     "name": scenario["name"],
                     "accuracy": accuracy,
