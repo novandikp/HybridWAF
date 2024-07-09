@@ -25,7 +25,7 @@ parser_test = subparser.add_parser("test", help="test the model")
 parser_test.set_defaults(func=test_all)
 
 parser_test2 = subparser.add_parser("test_new", help="test the model")
-parser_test2.add_argument("--variant", help="specify variant to test", type=str, default="psosvm_ecml_0.25")
+parser_test2.add_argument("--variant", help="specify variant to test", type=str, default="psosvm_ecml_0.25S_accuracy")
 parser_test2.set_defaults(func=test_new)
 
 config = BaseConfig(parse_config("config.yaml"))
